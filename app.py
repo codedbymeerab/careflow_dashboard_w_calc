@@ -326,7 +326,7 @@ st.dataframe(display_df, use_container_width=True, hide_index=True)
 # -----------------------------
 st.write("### What-If Risk Explorer")
 st.caption(
-    "Select an existing patient profile, adjust a few key inputs, and see how the model-predicted high-cost risk changes. Other model inputs remain fixed at the selected patient's current values. This tool is for scenario exploration only."
+    "Select an existing patient profile, adjust a few key inputs, and see how the model-predicted high-cost risk changes. Other model inputs, including baseline enrollment risk score, remain fixed at the selected patient's current values. This tool is for scenario exploration only."
 )
 
 if filtered_df.empty:
@@ -385,20 +385,11 @@ else:
             step=1
         )
 
-        edited_initial_risk = st.number_input(
-            "Initial Risk Score",
-            min_value=0.0,
-            max_value=100.0,
-            value=float(selected_patient_row["risk_score_initial"]),
-            step=0.1
-        )
-
     updated_patient_row = selected_patient_row.copy()
     updated_patient_row["total_adverse_events"] = edited_adverse_events
     updated_patient_row["chronic_condition_count"] = edited_chronic_conditions
     updated_patient_row["event_count_refill"] = edited_refill_count
     updated_patient_row["unique_drug_classes"] = edited_drug_classes
-    updated_patient_row["risk_score_initial"] = edited_initial_risk
 
     updated_input = pd.DataFrame([updated_patient_row])[model_features]
     updated_predicted_risk = float(model.predict_proba(updated_input)[:, 1][0])
@@ -430,22 +421,19 @@ else:
                 "Total Adverse Events",
                 "Chronic Condition Count",
                 "Refill Event Count",
-                "Unique Drug Classes",
-                "Initial Risk Score"
+                "Unique Drug Classes"
             ],
             "Current Value": [
                 int(selected_patient_row["total_adverse_events"]),
                 int(selected_patient_row["chronic_condition_count"]),
                 int(selected_patient_row["event_count_refill"]),
-                int(selected_patient_row["unique_drug_classes"]),
-                round(float(selected_patient_row["risk_score_initial"]), 1)
+                int(selected_patient_row["unique_drug_classes"])
             ],
             "Updated Value": [
                 int(edited_adverse_events),
                 int(edited_chronic_conditions),
                 int(edited_refill_count),
-                int(edited_drug_classes),
-                round(float(edited_initial_risk), 1)
+                int(edited_drug_classes)
             ]
         })
 
