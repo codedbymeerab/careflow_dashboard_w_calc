@@ -436,3 +436,22 @@ else:
         })
 
         st.dataframe(comparison_df, use_container_width=True, hide_index=True)
+
+# -----------------------------
+# 12. MODEL NOTES
+# -----------------------------
+st.markdown("---")
+st.markdown("#### Model Notes")
+
+st.caption(
+    "The predicted high-cost risk shown in the Priority Patient List comes directly from the final logistic regression model. "
+    "For each patient, the model applies the same preprocessing used during training: numeric predictors are standardized, "
+    "categorical predictors are one-hot encoded, and all transformed predictors are combined using the model's learned coefficients and intercept. "
+    "That total linear score is then converted into a probability between 0% and 100% using the logistic function."
+)
+
+st.caption(
+    "The What-If Risk Explorer uses the same full model and the same probability calculation. It starts from one real patient profile, "
+    "changes only the selected service variables, keeps all other predictors fixed, and reruns the full logistic regression pipeline. "
+    "Changing one of those inputs changes its contribution to the model's linear score, which changes the final predicted probability after the logistic transformation."
+)
