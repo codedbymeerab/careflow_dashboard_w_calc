@@ -326,7 +326,9 @@ st.dataframe(display_df, use_container_width=True, hide_index=True)
 # -----------------------------
 st.write("### What-If Risk Explorer")
 st.caption(
-    "Select an existing patient profile, adjust a few key inputs, and see how the model-predicted high-cost risk changes. Other model inputs, including baseline enrollment risk score, remain fixed at the selected patient's current values. This tool is for scenario exploration only."
+    "Choose a patient and test simple service-delivery scenarios. "
+    "You can adjust wait time, shipment delays, and missed interactions to see how the model-predicted high-cost risk changes. "
+    "Patient characteristics stay fixed in the background. This is for scenario exploration only."
 )
 
 if filtered_df.empty:
@@ -351,45 +353,52 @@ else:
     left_col, right_col = st.columns([1, 1])
 
     with left_col:
-        st.markdown("#### Edit Key Inputs")
+        st.markdown("#### Edit Service Scenario")
         st.caption(
             f"Current profile: Site = {selected_patient_row['site_id']}, "
             f"Region = {selected_patient_row['region']}"
         )
 
-        edited_adverse_events = st.number_input(
-            "Total Adverse Events",
+        st.markdown("**Patient context stays fixed**")
+        st.caption(
+            f"Chronic conditions: {int(selected_patient_row['chronic_condition_count'])} | "
+            f"Drug classes: {int(selected_patient_row['unique_drug_classes'])} | "
+            f"Initial risk score: {float(selected_patient_row['risk_score_initial']):.1f}"
+        )
+
+        edited_wait_days = st.number_input(
+            "Average Wait Days",
+            min_value=0.0,
+            value=float(selected_patient_row["avg_wait_days"]),
+            step=0.1
+        )
+
+        edited_delayed_shipments = st.number_input(
+            "Delayed Shipments Count",
             min_value=0,
-            value=int(selected_patient_row["total_adverse_events"]),
+            value=int(selected_patient_row["delayed_shipments_count"]),
             step=1
         )
 
-        edited_chronic_conditions = st.number_input(
-            "Chronic Condition Count",
+        edited_missed_or_not_attended = st.number_input(
+            "Missed / Not Attended Events",
             min_value=0,
-            value=int(selected_patient_row["chronic_condition_count"]),
+            value=int(selected_patient_row["total_missed_or_not_attended"]),
             step=1
         )
 
-        edited_refill_count = st.number_input(
-            "Refill Event Count",
+        edited_missed_visit_count = st.number_input(
+            "Missed Visit Count",
             min_value=0,
-            value=int(selected_patient_row["event_count_refill"]),
-            step=1
-        )
-
-        edited_drug_classes = st.number_input(
-            "Unique Drug Classes",
-            min_value=0,
-            value=int(selected_patient_row["unique_drug_classes"]),
+            value=int(selected_patient_row["event_count_missed_visit"]),
             step=1
         )
 
     updated_patient_row = selected_patient_row.copy()
-    updated_patient_row["total_adverse_events"] = edited_adverse_events
-    updated_patient_row["chronic_condition_count"] = edited_chronic_conditions
-    updated_patient_row["event_count_refill"] = edited_refill_count
-    updated_patient_row["unique_drug_classes"] = edited_drug_classes
+    updated_patient_row["avg_wait_days"] = edited_wait_days
+    updated_patient_row["delayed_shipments_count"] = edited_delayed_shipments
+    updated_patient_row["total_missed_or_not_attended"] = edited_missed_or_not_attended
+    updated_patient_row["event_count_missed_visit"] = edited_missed_visit_count
 
     updated_input = pd.DataFrame([updated_patient_row])[model_features]
     updated_predicted_risk = float(model.predict_proba(updated_input)[:, 1][0])
@@ -418,22 +427,22 @@ else:
 
         comparison_df = pd.DataFrame({
             "Variable": [
-                "Total Adverse Events",
-                "Chronic Condition Count",
-                "Refill Event Count",
-                "Unique Drug Classes"
+                "Average Wait Days",
+                "Delayed Shipments Count",
+                "Missed / Not Attended Events",
+                "Missed Visit Count"
             ],
             "Current Value": [
-                int(selected_patient_row["total_adverse_events"]),
-                int(selected_patient_row["chronic_condition_count"]),
-                int(selected_patient_row["event_count_refill"]),
-                int(selected_patient_row["unique_drug_classes"])
+                round(float(selected_patient_row["avg_wait_days"]), 1),
+                int(selected_patient_row["delayed_shipments_count"]),
+                int(selected_patient_row["total_missed_or_not_attended"]),
+                int(selected_patient_row["event_count_missed_visit"])
             ],
             "Updated Value": [
-                int(edited_adverse_events),
-                int(edited_chronic_conditions),
-                int(edited_refill_count),
-                int(edited_drug_classes)
+                round(float(edited_wait_days), 1),
+                int(edited_delayed_shipments),
+                int(edited_missed_or_not_attended),
+                int(edited_missed_visit_count)
             ]
         })
 
