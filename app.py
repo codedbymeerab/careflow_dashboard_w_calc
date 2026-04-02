@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 import joblib
 
-st.set_page_config(page_title="CareFlow AI Dashboard", layout="wide")
+st.set_page_config(page_title="ClarifAI Dashboard", layout="wide")
 
 # -----------------------------
 # 1. LOAD DATA + MODEL
