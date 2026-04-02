@@ -15,7 +15,7 @@ model_features = list(joblib.load("careflow_model_features.joblib"))
 # -----------------------------
 # 2. SIDEBAR FILTERS
 # -----------------------------
-st.title("CareFlow AI")
+st.title("ClarifAI")
 st.subheader("High-Cost Risk Overview Dashboard")
 
 st.sidebar.header("Filters")
@@ -324,7 +324,7 @@ st.dataframe(display_df, use_container_width=True, hide_index=True)
 # -----------------------------
 # 11. WHAT-IF RISK EXPLORER
 # -----------------------------
-st.write("### What-If Risk Explorer")
+st.write("### Risk Explorer")
 st.caption(
     "Choose a patient and test simple service-delivery scenarios. "
     "You can adjust wait time, shipment delays, and missed interactions to see how the model-predicted high-cost risk changes. "
@@ -387,18 +387,10 @@ else:
             step=1
         )
 
-        edited_missed_visit_count = st.number_input(
-            "Missed Visit Count",
-            min_value=0,
-            value=int(selected_patient_row["event_count_missed_visit"]),
-            step=1
-        )
-
     updated_patient_row = selected_patient_row.copy()
     updated_patient_row["avg_wait_days"] = edited_wait_days
     updated_patient_row["delayed_shipments_count"] = edited_delayed_shipments
     updated_patient_row["total_missed_or_not_attended"] = edited_missed_or_not_attended
-    updated_patient_row["event_count_missed_visit"] = edited_missed_visit_count
 
     updated_input = pd.DataFrame([updated_patient_row])[model_features]
     updated_predicted_risk = float(model.predict_proba(updated_input)[:, 1][0])
@@ -429,20 +421,17 @@ else:
             "Variable": [
                 "Average Wait Days",
                 "Delayed Shipments Count",
-                "Missed / Not Attended Events",
-                "Missed Visit Count"
+                "Missed / Not Attended Events"
             ],
             "Current Value": [
                 round(float(selected_patient_row["avg_wait_days"]), 1),
                 int(selected_patient_row["delayed_shipments_count"]),
-                int(selected_patient_row["total_missed_or_not_attended"]),
-                int(selected_patient_row["event_count_missed_visit"])
+                int(selected_patient_row["total_missed_or_not_attended"])
             ],
             "Updated Value": [
                 round(float(edited_wait_days), 1),
                 int(edited_delayed_shipments),
-                int(edited_missed_or_not_attended),
-                int(edited_missed_visit_count)
+                int(edited_missed_or_not_attended)
             ]
         })
 
